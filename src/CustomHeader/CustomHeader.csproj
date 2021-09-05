@@ -1,10 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
+  <Import Project="../package-version.props" />
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AssemblyName>Beginor.AspNetCore.Middlewares.CustomHeader</AssemblyName>
     <RootNamespace>Beginor.AspNetCore.Middlewares.CustomHeader</RootNamespace>
+    <Authors>beginor</Authors>
+    <Description>Beginor.AspNetCore.Middlewares.CustomHeader</Description>
+    <PackageId>Beginor.AspNetCore.Middlewares.CustomHeader</PackageId>
+    <Owners>beginor</Owners>
+    <PackageProjectUrl>https://github.com/beginor/aspnetcore.middlewares</PackageProjectUrl>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageTags>AspNetCore,Middlewares</PackageTags>
+    <Title>Beginor.AspNetCore.Middlewares.CustomHeader</Title>
   </PropertyGroup>
 
   <ItemGroup>
