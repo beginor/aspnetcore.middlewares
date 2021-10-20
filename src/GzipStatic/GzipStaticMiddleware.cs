@@ -66,10 +66,10 @@ namespace Beginor.AspNetCore.Middlewares.GzipStatic {
                 res.ContentType = contentType;
             }
             res.Headers["Content-Encoding"] = "gzip";
-            using var zipStream = zipFileInfo.OpenRead();
+            using var stream = zipFileInfo.OpenRead();
             var buffer = new byte[1024];
             var readed = 0;
-            while ((readed = await zipStream.ReadAsync(buffer, 0, 1024)) > 0) {
+            while ((readed = await stream.ReadAsync(buffer, 0, 1024)) > 0) {
                 await res.Body.WriteAsync(buffer, 0, readed);
             }
             await res.CompleteAsync();
