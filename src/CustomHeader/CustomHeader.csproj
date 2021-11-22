@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../package-version.props" />
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <AssemblyName>Beginor.AspNetCore.Middlewares.CustomHeader</AssemblyName>
     <RootNamespace>Beginor.AspNetCore.Middlewares.CustomHeader</RootNamespace>
