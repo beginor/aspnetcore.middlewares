@@ -4,42 +4,40 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace WebTest {
+namespace WebTest; 
 
-    public class Startup {
+public class Startup {
 
-        public Startup(IConfiguration configuration) {
-            Configuration = configuration;
+    public Startup(IConfiguration configuration) {
+        Configuration = configuration;
+    }
+
+    public IConfiguration Configuration { get; }
+
+    // This method gets called by the runtime. Use this method to add services to the container.
+    public void ConfigureServices(IServiceCollection services) {
+        services.ConfigureCustomHeader(Configuration.GetSection("customHeader"));
+        services.ConfigureSpaFailback(Configuration.GetSection("spaFailback"));
+        services.ConfigureGzipStatic();
+        services.AddControllers();
+    }
+
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+        app.UseCustomHeader();
+        if (env.IsDevelopment()) {
+            app.UseDeveloperExceptionPage();
         }
+        app.UseDefaultFiles();
+        app.UseGzipStatic();
+        app.UseSpaFailback();
+        app.UseStaticFiles();
 
-        public IConfiguration Configuration { get; }
-
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services) {
-            services.ConfigureCustomHeader(Configuration.GetSection("customHeader"));
-            services.ConfigureSpaFailback(Configuration.GetSection("spaFailback"));
-            services.ConfigureGzipStatic();
-            services.AddControllers();
-        }
-
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
-            app.UseCustomHeader();
-            if (env.IsDevelopment()) {
-                app.UseDeveloperExceptionPage();
-            }
-            app.UseDefaultFiles();
-            app.UseGzipStatic();
-            app.UseSpaFailback();
-            app.UseStaticFiles();
-
-            app.UseRouting();
-            app.UseAuthorization();
-            app.UseEndpoints(endpoints => {
-                endpoints.MapControllers();
-            });
-        }
-
+        app.UseRouting();
+        app.UseAuthorization();
+        app.UseEndpoints(endpoints => {
+            endpoints.MapControllers();
+        });
     }
 
 }
