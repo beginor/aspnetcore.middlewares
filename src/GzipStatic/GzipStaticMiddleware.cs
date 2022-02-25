@@ -48,7 +48,7 @@ namespace Beginor.AspNetCore.Middlewares.GzipStatic {
             logger.LogInformation($"Handle request for {filePath} with {zipFilePath}");
             var zipFileInfo = new FileInfo(zipFilePath);
             var fileTime = zipFileInfo.LastWriteTimeUtc.ToFileTime().ToString("X");
-            var etag = req.Headers["If-None-Match"].ToString();
+            var etag = req.Headers.IfNoneMatch.ToString();
             var res = context.Response;
             // check for etag;
             if (fileTime.Equals(etag, StringComparison.Ordinal)) {
@@ -59,21 +59,21 @@ namespace Beginor.AspNetCore.Middlewares.GzipStatic {
             }
             res.StatusCode = StatusCodes.Status200OK;
             res.Headers.ContentLength = zipFileInfo.Length;
-            res.Headers["Cache-Control"] = "no-cache";
-            res.Headers["ETag"] = fileTime;
+            res.Headers.CacheControl = "no-cache";
+            res.Headers.ETag = fileTime;
             res.ContentType = "application/octet-stream";
             if (contentTypeProvider.TryGetContentType(filePath, out var contentType)) {
                 res.ContentType = contentType;
             }
-            res.Headers["Content-Encoding"] = "gzip";
-            using var stream = zipFileInfo.OpenRead();
+            res.Headers.ContentEncoding = "gzip";
+            await using var stream = zipFileInfo.OpenRead();
             var buffer = new byte[1024];
-            var readed = 0;
+            int readed;
             while ((readed = await stream.ReadAsync(buffer, 0, 1024)) > 0) {
                 await res.Body.WriteAsync(buffer, 0, readed);
             }
             await res.CompleteAsync();
-            logger.LogInformation($"Return 200 with gzip encoding.");
+            logger.LogInformation("Return 200 with gzip encoding.");
         }
 
         private static string GetExtension(string path) {
@@ -81,11 +81,11 @@ namespace Beginor.AspNetCore.Middlewares.GzipStatic {
             // invalid characters in the path. Invalid characters should be handled
             // by the FileProviders
             if (string.IsNullOrWhiteSpace(path)) {
-                return null;
+                return String.Empty;
             }
             int index = path.LastIndexOf('.');
             if (index < 0) {
-                return null;
+                return string.Empty;
             }
             return path.Substring(index);
         }

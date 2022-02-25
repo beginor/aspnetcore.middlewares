@@ -1,22 +1,23 @@
+using System;
 using System.Text.RegularExpressions;
 
 namespace Beginor.AspNetCore.Middlewares.SpaFailback {
 
     public class SpaFailbackRule {
-        private Regex pathBaseRegex;
+
+        private Regex? pathBaseRegex;
+
         public Regex PathBaseRegex {
             get {
                 if (string.IsNullOrEmpty(PathBase)) {
-                    return null;
+                    throw new InvalidOperationException($"{nameof(PathBase)} is empty!");
                 }
-                if (pathBaseRegex == null) {
-                    pathBaseRegex = new Regex(PathBase);
-                }
-                return pathBaseRegex;
+                return pathBaseRegex ??= new Regex(PathBase);
             }
         }
-        public string PathBase { get; set; }
-        public string Failback { get; set; }
+        public string PathBase { get; init; } = string.Empty;
+
+        public string Failback { get; init; } = String.Empty;
     }
 
 

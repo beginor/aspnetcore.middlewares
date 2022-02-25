@@ -2,6 +2,7 @@
   <Import Project="../package-version.props" />
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
     <AssemblyName>Beginor.AspNetCore.Middlewares.SpaFailback</AssemblyName>
     <RootNamespace>Beginor.AspNetCore.Middlewares.SpaFailback</RootNamespace>
