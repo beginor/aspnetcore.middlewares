@@ -1,5 +1,5 @@
 #!/bin/bash -e
-PACKAGE_VERSION="6.0.1"
+PACKAGE_VERSION="6.0.2"
 
 dotnet pack src/CustomHeader/CustomHeader.csproj -c Release
 dotnet nuget push src/CustomHeader/bin/Release/Beginor.AspNetCore.Middlewares.CustomHeader.$PACKAGE_VERSION.nupkg -s nuget.org -k $(cat ~/.nuget/key.txt)

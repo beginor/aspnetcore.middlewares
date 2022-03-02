@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Beginor.AspNetCore.Middlewares.SpaFailback; 
+namespace Beginor.AspNetCore.Middlewares.SpaFailback;
 
 public class SpaFailbackMiddleware {
 
@@ -38,7 +38,7 @@ public class SpaFailbackMiddleware {
             var filePath = Path.Combine(env.WebRootPath, reqPath.Substring(1));
             if (!File.Exists(filePath) && !Directory.Exists(filePath)) {
                 var failback = options.Rules.FirstOrDefault(
-                    f => f.PathBaseRegex.IsMatch(reqPath.ToLowerInvariant())
+                    f => f.PathBaseRegex != null && f.PathBaseRegex.IsMatch(reqPath)
                 );
                 if (failback != null) {
                     request.Path = failback.Failback;
