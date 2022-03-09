@@ -11,7 +11,7 @@
     <PackageId>Beginor.AspNetCore.Middlewares.CustomHeader</PackageId>
     <Owners>beginor</Owners>
     <PackageProjectUrl>https://github.com/beginor/aspnetcore.middlewares</PackageProjectUrl>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>*</PackageReleaseNotes>
     <PackageTags>AspNetCore,Middlewares</PackageTags>
     <Title>Beginor.AspNetCore.Middlewares.CustomHeader</Title>
   </PropertyGroup>
