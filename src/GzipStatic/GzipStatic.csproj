@@ -2,8 +2,8 @@
   <Import Project="../package-version.props" />
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
     <AssemblyName>Beginor.AspNetCore.Middlewares.GzipStatic</AssemblyName>
     <RootNamespace>Beginor.AspNetCore.Middlewares.GzipStatic</RootNamespace>
     <Authors>beginor</Authors>
