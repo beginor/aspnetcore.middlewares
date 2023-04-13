@@ -1,23 +1,40 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
+using System.IO;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
-namespace WebTest; 
+var builder = WebApplication.CreateBuilder(args);
 
-public class Program {
+// Add services to the container.
+builder.Services.ConfigureCustomHeader(builder.Configuration.GetSection("customHeader"));
+builder.Services.ConfigureSpaFailback(builder.Configuration.GetSection("spaFailback"));
+builder.Services.ConfigureGzipStatic();
+builder.Services.AddControllers();
 
-    public static void Main(string[] args) {
-        CreateHostBuilder(args).Build().Run();
-    }
-
-    public static IHostBuilder CreateHostBuilder(string[] args) =>
-        Host.CreateDefaultBuilder(args)
-            .ConfigureWebHostDefaults(webBuilder => {
-                webBuilder.UseStartup<Startup>();
-            });
+var app = builder.Build();
+app.UsePathBase(new PathString("/webtest"));
+app.UseCustomHeader();
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment()) {
+    app.UseDeveloperExceptionPage();
 }
+app.UseDefaultFiles();
+app.UseGzipStatic();
+app.UseSpaFailback();
+var rootPath = app.Environment.ContentRootPath;
+app.UseStaticFiles(
+    new StaticFileOptions {
+        FileProvider = new CompositeFileProvider(
+            new PhysicalFileProvider(Path.Combine(rootPath, "wwwroot")),
+            new PhysicalFileProvider(Path.Combine(rootPath, "../../../../javascript"))
+        )
+    }
+);
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();
