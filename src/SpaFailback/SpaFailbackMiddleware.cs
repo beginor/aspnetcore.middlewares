@@ -25,9 +25,9 @@ public class SpaFailbackMiddleware {
         this.next = next ?? throw new ArgumentNullException(nameof(next));
         this.env = env ?? throw new ArgumentNullException(nameof(env));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        this.options = monitor.CurrentValue ?? throw new ArgumentNullException(nameof(monitor));
+        options = monitor.CurrentValue ?? throw new ArgumentNullException(nameof(monitor));
         monitor.OnChange(newVal => {
-            this.options = newVal;
+            options = newVal;
         });
     }
 
@@ -35,13 +35,14 @@ public class SpaFailbackMiddleware {
         var request = context.Request;
         var reqPath = request.Path.ToString();
         if (!request.IsAjaxRequest() && !string.IsNullOrEmpty(reqPath)) {
-            var filePath = Path.Combine(env.WebRootPath, reqPath.Substring(1));
-            if (!File.Exists(filePath) && !Directory.Exists(filePath)) {
+            var fileInfo = env.WebRootFileProvider.GetFileInfo(reqPath);
+            if (!fileInfo.Exists) {
                 var failback = options.Rules.FirstOrDefault(
                     f => f.PathBaseRegex != null && f.PathBaseRegex.IsMatch(reqPath)
                 );
                 if (failback != null) {
                     request.Path = failback.Failback;
+                    logger.LogInformation($"SpaFailback: {reqPath} -> {failback.Failback}");
                 }
             }
         }

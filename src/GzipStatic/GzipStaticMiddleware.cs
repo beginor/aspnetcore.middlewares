@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 
-namespace Beginor.AspNetCore.Middlewares.GzipStatic; 
+namespace Beginor.AspNetCore.Middlewares.GzipStatic;
 
 public class GzipStaticMiddleware {
 
@@ -35,9 +35,12 @@ public class GzipStaticMiddleware {
             await next(context);
             return;
         }
-        var filePath = Path.Combine(env.WebRootPath, reqPath.Substring(1));
-        var zipFilePath = filePath + ".gz";
-        if (!File.Exists(zipFilePath)) {
+        var fileInfo = env.WebRootFileProvider.GetFileInfo(reqPath);
+        if (fileInfo.IsDirectory) {
+            await next(context);
+        }
+        var zipFileInfo = env.WebRootFileProvider.GetFileInfo(reqPath + ".gz");
+        if (!zipFileInfo.Exists) {
             await next(context);
             return;
         }
@@ -45,9 +48,8 @@ public class GzipStaticMiddleware {
             await next(context);
             return;
         }
-        logger.LogInformation($"Handle request for {filePath} with {zipFilePath}");
-        var zipFileInfo = new FileInfo(zipFilePath);
-        var fileTime = zipFileInfo.LastWriteTimeUtc.ToFileTime().ToString("X");
+        logger.LogInformation($"Handle request for {fileInfo.PhysicalPath} with {zipFileInfo.PhysicalPath}");
+        var fileTime = zipFileInfo.LastModified.ToFileTime().ToString("X");
         var etag = req.Headers.IfNoneMatch.ToString();
         var res = context.Response;
         // check for etag;
@@ -62,11 +64,11 @@ public class GzipStaticMiddleware {
         res.Headers.CacheControl = "no-cache";
         res.Headers.ETag = fileTime;
         res.ContentType = "application/octet-stream";
-        if (contentTypeProvider.TryGetContentType(filePath, out var contentType)) {
+        if (contentTypeProvider.TryGetContentType(reqPath, out var contentType)) {
             res.ContentType = contentType;
         }
         res.Headers.ContentEncoding = "gzip";
-        await using var stream = zipFileInfo.OpenRead();
+        await using var stream = zipFileInfo.CreateReadStream();
         var buffer = new byte[1024];
         int readed;
         while ((readed = await stream.ReadAsync(buffer, 0, 1024)) > 0) {
