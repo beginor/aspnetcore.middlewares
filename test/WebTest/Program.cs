@@ -5,16 +5,27 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
+var webAppOpts = new WebApplicationOptions {
+};
+var builder = WebApplication.CreateBuilder();
 
 // Add services to the container.
+
 builder.Services.ConfigureCustomHeader(builder.Configuration.GetSection("customHeader"));
+var rootPath = builder.Environment.ContentRootPath;
+var fileProvider = new CompositeFileProvider(
+    new PhysicalFileProvider(Path.Combine(rootPath, "wwwroot")),
+    new PhysicalFileProvider(Path.Combine(rootPath, "../../../../work/emap-server/client/dist")),
+    new PhysicalFileProvider(Path.Combine(rootPath, "../../../../work/emap-client"))
+);
+builder.Services.AddSingleton<IFileProvider>(fileProvider);
+
 builder.Services.ConfigureSpaFailback(builder.Configuration.GetSection("spaFailback"));
 builder.Services.ConfigureGzipStatic();
 builder.Services.AddControllers();
 
 var app = builder.Build();
-app.UsePathBase(new PathString("/webtest"));
+app.UsePathBase(new PathString("/emap"));
 app.UseCustomHeader();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
@@ -23,16 +34,14 @@ if (app.Environment.IsDevelopment()) {
 app.UseDefaultFiles();
 app.UseGzipStatic();
 app.UseSpaFailback();
-var rootPath = app.Environment.ContentRootPath;
-app.UseStaticFiles(
-    new StaticFileOptions {
-        FileProvider = new CompositeFileProvider(
-            new PhysicalFileProvider(Path.Combine(rootPath, "wwwroot")),
-            new PhysicalFileProvider(Path.Combine(rootPath, "../../../../javascript"))
-        )
-    }
-);
 
+var provider = app.Services.GetService<IFileProvider>();
+if (provider == null) {
+    app.UseStaticFiles();
+}
+else {
+    app.UseStaticFiles(new StaticFileOptions { FileProvider = provider });
+}
 app.UseAuthorization();
 
 app.MapControllers();

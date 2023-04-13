@@ -1,9 +1,11 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -34,16 +36,28 @@ public class SpaFailbackMiddleware {
     public Task InvokeAsync(HttpContext context) {
         var request = context.Request;
         var reqPath = request.Path.ToString();
-        if (!request.IsAjaxRequest() && !string.IsNullOrEmpty(reqPath)) {
-            var fileInfo = env.WebRootFileProvider.GetFileInfo(reqPath);
-            if (!fileInfo.Exists) {
-                var failback = options.Rules.FirstOrDefault(
-                    f => f.PathBaseRegex != null && f.PathBaseRegex.IsMatch(reqPath)
-                );
-                if (failback != null) {
-                    request.Path = failback.Failback;
-                    logger.LogInformation($"SpaFailback: {reqPath} -> {failback.Failback}");
-                }
+        if (request.IsAjaxRequest()) {
+            return next(context);
+        }
+        if (string.IsNullOrEmpty(reqPath)) {
+            return next(context);
+        }
+        // if (string.IsNullOrEmpty(request.Headers.Referer.ToString())) {
+        //     return next(context);
+        // }
+
+        var fileProvider = context.RequestServices.GetService<IFileProvider>();
+        if (fileProvider == null) {
+            fileProvider = env.WebRootFileProvider;
+        }
+        var fileInfo = fileProvider.GetFileInfo(reqPath);
+        if (!fileInfo.Exists) {
+            var failback = options.Rules.FirstOrDefault(
+                f => f.PathBaseRegex != null && f.PathBaseRegex.IsMatch(reqPath)
+            );
+            if (failback != null) {
+                request.Path = failback.Failback;
+                logger.LogInformation($"SpaFailback: {reqPath} -> {failback.Failback}");
             }
         }
         return next(context);
