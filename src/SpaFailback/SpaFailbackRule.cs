@@ -5,10 +5,19 @@ namespace Beginor.AspNetCore.Middlewares.SpaFailback;
 
 public class SpaFailbackRule {
 
-    public Regex? PathBaseRegex => string.IsNullOrEmpty(PathBase) ? null : new Regex(PathBase, RegexOptions.IgnoreCase);
+    public SpaFailbackRule(string pattern, string failback) {
+        if (string.IsNullOrEmpty(pattern)) {
+            throw new ArgumentNullException(nameof(pattern), "Failback pattern can not be empty!");
+        }
+        if (string.IsNullOrEmpty(failback)) {
+            throw new ArgumentNullException(nameof(failback), "Failback path can not be empty!");
+        }
+        Pattern = new Regex(pattern, RegexOptions.IgnoreCase);
+        Failback = failback;
+    }
 
-    public string PathBase { get; init; } = string.Empty;
+    public Regex Pattern { get; }
 
-    public string Failback { get; init; } = String.Empty;
+    public string Failback { get; }
 
 }

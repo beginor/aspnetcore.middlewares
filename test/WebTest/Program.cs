@@ -5,8 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 
-var webAppOpts = new WebApplicationOptions {
-};
+var webAppOpts = new WebApplicationOptions { };
 var builder = WebApplication.CreateBuilder();
 
 // Add services to the container.
@@ -21,7 +20,9 @@ var fileProvider = new CompositeFileProvider(
 builder.Services.AddSingleton<IFileProvider>(fileProvider);
 
 builder.Services.ConfigureSpaFailback(builder.Configuration.GetSection("spaFailback"));
-builder.Services.ConfigureGzipStatic();
+if (builder.Environment.IsProduction()) {
+    builder.Services.ConfigureGzipStatic();
+}
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -32,7 +33,9 @@ if (app.Environment.IsDevelopment()) {
     app.UseDeveloperExceptionPage();
 }
 app.UseDefaultFiles();
-app.UseGzipStatic();
+if (app.Environment.IsProduction()) {
+    app.UseGzipStatic();
+}
 app.UseSpaFailback();
 
 var provider = app.Services.GetService<IFileProvider>();

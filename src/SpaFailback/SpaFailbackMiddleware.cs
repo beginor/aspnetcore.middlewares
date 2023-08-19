@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -15,20 +17,20 @@ public class SpaFailbackMiddleware {
     private readonly RequestDelegate next;
     private readonly IWebHostEnvironment env;
     private readonly ILogger<SpaFailbackMiddleware> logger;
-    private SpaFailbackOptions options;
+    private IEnumerable<SpaFailbackRule> failbackRules;
 
     public SpaFailbackMiddleware(
         RequestDelegate next,
         IWebHostEnvironment env,
         ILogger<SpaFailbackMiddleware> logger,
-        IOptionsMonitor<SpaFailbackOptions> monitor
+        IOptionsMonitor<Dictionary<string, string>> monitor
     ) {
         this.next = next ?? throw new ArgumentNullException(nameof(next));
         this.env = env ?? throw new ArgumentNullException(nameof(env));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        options = monitor.CurrentValue ?? throw new ArgumentNullException(nameof(monitor));
-        monitor.OnChange(newVal => {
-            options = newVal;
+        this.failbackRules = BuildFailbackRules(monitor.Get(Consts.OptionsName));
+        monitor.OnChange(_ => {
+            this.failbackRules = BuildFailbackRules(monitor.Get(Consts.OptionsName));
         });
     }
 
@@ -41,24 +43,25 @@ public class SpaFailbackMiddleware {
         if (string.IsNullOrEmpty(reqPath)) {
             return next(context);
         }
-        // if (string.IsNullOrEmpty(request.Headers.Referer.ToString())) {
-        //     return next(context);
-        // }
-
-        var fileProvider = context.RequestServices.GetService<IFileProvider>();
-        if (fileProvider == null) {
-            fileProvider = env.WebRootFileProvider;
-        }
+        var fileProvider = context.RequestServices.GetService<IFileProvider>()
+            ?? env.WebRootFileProvider;
         var fileInfo = fileProvider.GetFileInfo(reqPath);
-        if (!fileInfo.Exists) {
-            var failback = options.Rules.FirstOrDefault(
-                f => f.PathBaseRegex != null && f.PathBaseRegex.IsMatch(reqPath)
-            );
-            if (failback != null) {
-                request.Path = failback.Failback;
-                logger.LogInformation($"SpaFailback: {reqPath} -> {failback.Failback}");
-            }
+        if (fileInfo.Exists) {
+            return next(context);
         }
+        var failbackRule = failbackRules.FirstOrDefault(
+            f => f.Pattern.IsMatch(reqPath)
+        );
+        if (failbackRule == null) {
+            return next(context);
+        }
+        request.Path = failbackRule.Failback;
+        logger.LogInformation($"SpaFailback: {reqPath} -> {failbackRule.Failback}");
         return next(context);
+    }
+
+    private IEnumerable<SpaFailbackRule> BuildFailbackRules(Dictionary<string, string> dict) {
+        var keys = dict.Keys;
+        return keys.Select(key => new SpaFailbackRule(key, dict[key]));
     }
 }

@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 
 namespace Beginor.AspNetCore.Middlewares.GzipStatic;
@@ -35,11 +37,13 @@ public class GzipStaticMiddleware {
             await next(context);
             return;
         }
-        var fileInfo = env.WebRootFileProvider.GetFileInfo(reqPath);
+        var fileProvider = context.RequestServices.GetService<IFileProvider>()
+            ?? env.WebRootFileProvider;
+        var fileInfo = fileProvider.GetFileInfo(reqPath);
         if (fileInfo.IsDirectory) {
             await next(context);
         }
-        var zipFileInfo = env.WebRootFileProvider.GetFileInfo(reqPath + ".gz");
+        var zipFileInfo = fileProvider.GetFileInfo(reqPath + ".gz");
         if (!zipFileInfo.Exists) {
             await next(context);
             return;
