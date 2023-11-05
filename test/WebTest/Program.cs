@@ -13,9 +13,7 @@ var builder = WebApplication.CreateBuilder();
 builder.Services.ConfigureCustomHeader(builder.Configuration.GetSection("customHeader"));
 var rootPath = builder.Environment.ContentRootPath;
 var fileProvider = new CompositeFileProvider(
-    new PhysicalFileProvider(Path.Combine(rootPath, "wwwroot")),
-    new PhysicalFileProvider(Path.Combine(rootPath, "../../../../work/emap-server/client/dist")),
-    new PhysicalFileProvider(Path.Combine(rootPath, "../../../../work/emap-client"))
+    new PhysicalFileProvider(Path.Combine(rootPath, "wwwroot"))
 );
 builder.Services.AddSingleton<IFileProvider>(fileProvider);
 
@@ -26,7 +24,7 @@ if (builder.Environment.IsProduction()) {
 builder.Services.AddControllers();
 
 var app = builder.Build();
-app.UsePathBase(new PathString("/emap"));
+app.UsePathBase(new PathString("/test"));
 app.UseCustomHeader();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
