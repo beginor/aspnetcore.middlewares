@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/assets/">
+    <File Path="push-package.sh" />
+    <File Path="README.md" />
+    <File Path="src/package-version.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/CustomHeader/CustomHeader.csproj" />
+    <Project Path="src/GzipStatic/GzipStatic.csproj" />
+    <Project Path="src/SpaFailback/SpaFailback.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/WebTest/WebTest.csproj" />
+  </Folder>
+</Solution>
