@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../package-version.props" />
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -10,9 +9,10 @@
     <Description>Beginor.AspNetCore.Middlewares.GzipStatic</Description>
     <PackageId>Beginor.AspNetCore.Middlewares.GzipStatic</PackageId>
     <Owners>beginor</Owners>
-    <PackageProjectUrl>https://github.com/beginor/aspnetcore.middlewares</PackageProjectUrl>
-    <PackageReleaseNotes>*</PackageReleaseNotes>
-    <PackageTags>AspNetCore,Middlewares</PackageTags>
+    <PackageVersion>$(PACKAGE_VERSION)</PackageVersion>
+    <PackageReleaseNotes>$(PACKAGE_RELEASE_NOTES)</PackageReleaseNotes>
+    <PackageTags>$(PACKAGE_TAGS)</PackageTags>
+    <PackageProjectUrl>$(PACKAGE_PROJECT_URL)</PackageProjectUrl>
     <Title>Beginor.AspNetCore.Middlewares.GzipStatic</Title>
   </PropertyGroup>
 

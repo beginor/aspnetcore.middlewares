@@ -1,14 +1,22 @@
 #!/bin/bash -e
-PACKAGE_VERSION="9.0.0"
+export PACKAGE_VERSION="9.0.0"
+export PACKAGE_RELEASE_NOTES="Update to .NET 9.0"
+export PACKAGE_TAGS="AspNetCore,Middlewares"
+export PACKAGE_PROJECT_URL="https://github.com/beginor/aspnetcore.middlewares"
 
-dotnet pack src/CustomHeader/CustomHeader.csproj -c Release
-dotnet nuget push src/CustomHeader/bin/Release/Beginor.AspNetCore.Middlewares.CustomHeader.$PACKAGE_VERSION.nupkg -s nuget.org -k $(cat ~/.nuget/key.txt)
-rm src/CustomHeader/bin/Release/*.nupkg
+PROJECTS=( \
+  "src/CustomHeader/CustomHeader.csproj" \
+  "src/GzipStatic/GzipStatic.csproj" \
+  "src/SpaFailback/SpaFailback.csproj" \
+)
 
-dotnet pack src/GzipStatic/GzipStatic.csproj -c Release
-dotnet nuget push src/GzipStatic/bin/Release/Beginor.AspNetCore.Middlewares.GzipStatic.$PACKAGE_VERSION.nupkg -s nuget.org -k $(cat ~/.nuget/key.txt)
-rm src/GzipStatic/bin/Release/*.nupkg
+for PROJ in "${PROJECTS[@]}"
+do
+  echo "packing $PROJ"
+  dotnet pack $PROJ -c Release --output ./nupkgs/
+done
 
-dotnet pack src/SpaFailback/SpaFailback.csproj -c Release
-dotnet nuget push src/SpaFailback/bin/Release/Beginor.AspNetCore.Middlewares.SpaFailback.$PACKAGE_VERSION.nupkg -s nuget.org -k $(cat ~/.nuget/key.txt)
-rm src/SpaFailback/bin/Release/*.nupkg
+dotnet nuget push ./nupkgs/*.nupkg -s nuget.org -k $(cat ~/.nuget/github.txt) \
+  --skip-duplicate
+
+rm -rf ./nupkgs
