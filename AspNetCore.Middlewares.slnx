@@ -1,8 +1,9 @@
 <Solution>
   <Folder Name="/assets/">
-    <File Path="push-package.sh" />
+    <File Path="release.env" />
     <File Path="README.md" />
     <File Path="src/package-version.props" />
+    <File Path="docs/publish-nuget.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/CustomHeader/CustomHeader.csproj" />
